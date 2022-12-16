@@ -1,0 +1,36 @@
+version: '3'
+services:
+  echo_graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/go/src/app:cached
+    command: air -c .air.toml
+    environment:
+      GO_MODE: development
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_HOST: db
+      DB_NAME: echo_graphql
+      SECRET_HASH_KEY: s3092Izdfa2dd3DJGe2KiefaCdDEa2t02B31
+    ports:
+      - 3010:3000
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: ./mysql
+      dockerfile: ./Dockerfile
+    platform: linux/amd64
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:
