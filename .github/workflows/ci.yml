@@ -56,8 +56,8 @@ jobs:
           DB_USER: root
           DB_PASSWORD: password
           DB_HOST: 127.0.0.1
-          DB_NAME: resetapi
-          SECRET_HASH_KEY: welkfaIEeifne212iiIDewaf
+          DB_NAME: echo_graphql
+          SECRET_HASH_KEY: SECRET_HASH_KEY
         run: |
           go run db/create_database.go
           sql-migrate up -env="test"
