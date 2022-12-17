@@ -16,9 +16,9 @@ const (
 )
 
 type AuthUsecase interface {
-	SignIn(ctx context.Context, signInParams *model.SignInInput) (user *model.User, err error)
-	SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *model.User, err error)
-	Show(ctx context.Context) (user *model.User, err error)
+	SignIn(ctx context.Context, signInParams *model.SignInInput) (user *entity.User, err error)
+	SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *entity.User, err error)
+	Show(ctx context.Context) (user *entity.User, err error)
 	SignOut(ctx context.Context) error
 }
 
@@ -38,7 +38,7 @@ func NewAuthUsecase(userRepo database.UserRepository, cookieService services.Coo
 	}
 }
 
-func (uu *authUsecase) SignIn(ctx context.Context, signInParams *model.SignInInput) (user *model.User, err error) {
+func (uu *authUsecase) SignIn(ctx context.Context, signInParams *model.SignInInput) (user *entity.User, err error) {
 	loginUser, err := uu.userRepo.FindByEmail(signInParams.Email)
 	if err != nil {
 		return nil, err
@@ -58,12 +58,10 @@ func (uu *authUsecase) SignIn(ctx context.Context, signInParams *model.SignInInp
 		return nil, err
 	}
 
-	user = entity.ToModelUser(loginUser)
-
-	return
+	return loginUser, nil
 }
 
-func (uu *authUsecase) SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *model.User, err error) {
+func (uu *authUsecase) SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *entity.User, err error) {
 	hashPwd, err := uu.cyptoService.HashAndSalt([]byte(signInParams.Password))
 	if err != nil {
 		return nil, err
@@ -85,12 +83,10 @@ func (uu *authUsecase) SignUp(ctx context.Context, signInParams *model.SignUpInp
 		return nil, err
 	}
 
-	user = entity.ToModelUser(loginUser)
-
-	return
+	return loginUser, nil
 }
 
-func (uu *authUsecase) Show(ctx context.Context) (user *model.User, err error) {
+func (uu *authUsecase) Show(ctx context.Context) (user *entity.User, err error) {
 	accessToken, err := uu.cookieService.GetCookieValue(ctx, ACCESS_TOKEN_KEY)
 	if err != nil {
 		return nil, err
@@ -106,9 +102,7 @@ func (uu *authUsecase) Show(ctx context.Context) (user *model.User, err error) {
 		return nil, err
 	}
 
-	user = entity.ToModelUser(loginUser)
-
-	return
+	return loginUser, nil
 }
 
 func (uu *authUsecase) SignOut(ctx context.Context) error {
