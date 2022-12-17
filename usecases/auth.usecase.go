@@ -19,7 +19,7 @@ type AuthUsecase interface {
 	SignIn(ctx context.Context, signInParams *model.SignInInput) (user *model.User, err error)
 	SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *model.User, err error)
 	Show(ctx context.Context) (user *model.User, err error)
-	Delete(ctx context.Context) error
+	SignOut(ctx context.Context) error
 }
 
 type authUsecase struct {
@@ -111,7 +111,7 @@ func (uu *authUsecase) Show(ctx context.Context) (user *model.User, err error) {
 	return
 }
 
-func (uu *authUsecase) Delete(ctx context.Context) error {
+func (uu *authUsecase) SignOut(ctx context.Context) error {
 	accessToken, err := uu.cookieService.GetCookieValue(ctx, ACCESS_TOKEN_KEY)
 	if err != nil {
 		return err
