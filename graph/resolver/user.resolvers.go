@@ -10,9 +10,9 @@ import (
 	"fmt"
 )
 
-// Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, loginInput model.LoginInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+// SignIn is the resolver for the signIn field.
+func (r *mutationResolver) SignIn(ctx context.Context, signInInput model.SignInInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: signIn - signIn"))
 }
 
 // SignUp is the resolver for the signUp field.

@@ -3,7 +3,7 @@ type User {
   name: String!
 }
 
-input LoginInput {
+input SignInInput {
   email: String!
   password: String!
 }
@@ -19,7 +19,7 @@ type Msg {
 }
 
 extend type Mutation {
-  login(loginInput: LoginInput!): User!
+  signIn(signInInput: SignInInput!): User!
   signUp(signUpInput: SignUpInput!): User!
   logout: Msg!
 }
