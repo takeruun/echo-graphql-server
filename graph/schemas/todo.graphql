@@ -5,15 +5,16 @@ type Todo {
   user: User!
 }
 
-type Query {
-  todos: [Todo!]!
-}
-
 input NewTodo {
   text: String!
   userId: String!
 }
 
-type Mutation {
+extend type Mutation {
   createTodo(input: NewTodo!): Todo!
+}
+
+extend type Query {
+  todo(id: ID!): Todo!
+  todos: [Todo!]!
 }
