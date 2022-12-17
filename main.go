@@ -4,6 +4,7 @@ import (
 	"app/config"
 	"app/graph/generated"
 	"app/graph/resolver"
+	"app/middlewares"
 	"log"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -17,6 +18,7 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(echo.WrapMiddleware(middlewares.SetHttpContextMiddleware()))
 
 	db := config.NewDB()
 
