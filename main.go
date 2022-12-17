@@ -24,7 +24,7 @@ func main() {
 
 	graphqlHandler := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &resolver.Resolver{DB: db.DB}},
+			generated.Config{Resolvers: resolver.NewResolver(db)},
 		),
 	)
 	playgroundHandler := playground.Handler("GraphQL", "/query")

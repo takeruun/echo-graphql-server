@@ -2,18 +2,18 @@
 
 package model
 
-type LoginInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+type CreateTodo struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
 
 type Msg struct {
 	Message string `json:"message"`
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type SignInInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type SignUpInput struct {
@@ -23,10 +23,14 @@ type SignUpInput struct {
 }
 
 type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	User        *User  `json:"user"`
+}
+
+type UpdateTodo struct {
+	Description string `json:"description"`
 }
 
 type User struct {
