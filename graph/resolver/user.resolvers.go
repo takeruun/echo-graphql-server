@@ -12,12 +12,16 @@ import (
 
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, signInInput model.SignInInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: signIn - signIn"))
+	user, err := r.AuthUsecase.SignIn(ctx, &signInInput)
+
+	return user, err
 }
 
 // SignUp is the resolver for the signUp field.
 func (r *mutationResolver) SignUp(ctx context.Context, signUpInput model.SignUpInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: SignUp - signUp"))
+	user, err := r.AuthUsecase.SignUp(ctx, &signUpInput)
+
+	return user, err
 }
 
 // Logout is the resolver for the logout field.

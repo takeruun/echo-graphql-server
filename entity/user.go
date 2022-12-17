@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"app/graph/model"
+	"strconv"
 	"time"
 )
 
@@ -12,4 +14,11 @@ type User struct {
 	CreatedAt    time.Time  `json:"createdAt"`
 	UpdatedAt    time.Time  `json:"updatedAt"`
 	DeletedAt    *time.Time `json:"deletedAt"`
+}
+
+func ToModelUser(u *User) *model.User {
+	return &model.User{
+		ID:   strconv.Itoa(int(u.ID)),
+		Name: u.Name,
+	}
 }

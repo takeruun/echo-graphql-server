@@ -16,9 +16,9 @@ const (
 )
 
 type AuthUsecase interface {
-	SignIn(ctx context.Context, signInParams *model.SignInInput) error
-	SignUp(ctx context.Context, signInParams *model.SignUpInput) error
-	Show(ctx context.Context) (user *entity.User, err error)
+	SignIn(ctx context.Context, signInParams *model.SignInInput) (user *model.User, err error)
+	SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *model.User, err error)
+	Show(ctx context.Context) (user *model.User, err error)
 	Delete(ctx context.Context) error
 }
 
@@ -38,55 +38,59 @@ func NewAuthUsecase(userRepo database.UserRepository, cookieService services.Coo
 	}
 }
 
-func (uu *authUsecase) SignIn(ctx context.Context, signInParams *model.SignInInput) error {
+func (uu *authUsecase) SignIn(ctx context.Context, signInParams *model.SignInInput) (user *model.User, err error) {
 	loginUser, err := uu.userRepo.FindByEmail(signInParams.Email)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !uu.cyptoService.ComparePasswords(loginUser.HashPassword, []byte(signInParams.Password)) {
-		return errors.New("Authentication Failure")
+		return nil, errors.New("Authentication Failure")
 	}
 
 	accessToken, err := uu.jwtService.GenerateToken(uint(loginUser.ID), time.Now())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = uu.cookieService.SetCookie(ctx, ACCESS_TOKEN_KEY, accessToken)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	user = entity.ToModelUser(loginUser)
+
+	return
 }
 
-func (uu *authUsecase) SignUp(ctx context.Context, signInParams *model.SignUpInput) error {
+func (uu *authUsecase) SignUp(ctx context.Context, signInParams *model.SignUpInput) (user *model.User, err error) {
 	hashPwd, err := uu.cyptoService.HashAndSalt([]byte(signInParams.Password))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	u := entity.User{Name: signInParams.Name, Email: signInParams.Email, HashPassword: hashPwd}
 	loginUser, err := uu.userRepo.Create(&u)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	accessToken, err := uu.jwtService.GenerateToken(uint(loginUser.ID), time.Now())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = uu.cookieService.SetCookie(ctx, ACCESS_TOKEN_KEY, accessToken)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	user = entity.ToModelUser(loginUser)
+
+	return
 }
 
-func (uu *authUsecase) Show(ctx context.Context) (user *entity.User, err error) {
+func (uu *authUsecase) Show(ctx context.Context) (user *model.User, err error) {
 	accessToken, err := uu.cookieService.GetCookieValue(ctx, ACCESS_TOKEN_KEY)
 	if err != nil {
 		return nil, err
@@ -97,10 +101,12 @@ func (uu *authUsecase) Show(ctx context.Context) (user *entity.User, err error) 
 		return nil, err
 	}
 
-	user, err = uu.userRepo.Find(uint64(auth.Uid))
+	loginUser, err := uu.userRepo.Find(uint64(auth.Uid))
 	if err != nil {
 		return nil, err
 	}
+
+	user = entity.ToModelUser(loginUser)
 
 	return
 }
