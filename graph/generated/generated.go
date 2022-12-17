@@ -51,8 +51,8 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateTodo func(childComplexity int, input model.CreateTodo) int
 		Empty      func(childComplexity int) int
-		Logout     func(childComplexity int) int
 		SignIn     func(childComplexity int, signInInput model.SignInInput) int
+		SignOut    func(childComplexity int) int
 		SignUp     func(childComplexity int, signUpInput model.SignUpInput) int
 		UpdateTodo func(childComplexity int, input model.UpdateTodo) int
 	}
@@ -82,7 +82,7 @@ type MutationResolver interface {
 	UpdateTodo(ctx context.Context, input model.UpdateTodo) (*model.Todo, error)
 	SignIn(ctx context.Context, signInInput model.SignInInput) (*model.User, error)
 	SignUp(ctx context.Context, signUpInput model.SignUpInput) (*model.User, error)
-	Logout(ctx context.Context) (*model.Msg, error)
+	SignOut(ctx context.Context) (*model.Msg, error)
 }
 type QueryResolver interface {
 	Empty(ctx context.Context) (*string, error)
@@ -131,13 +131,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Empty(childComplexity), true
 
-	case "Mutation.logout":
-		if e.complexity.Mutation.Logout == nil {
-			break
-		}
-
-		return e.complexity.Mutation.Logout(childComplexity), true
-
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
 			break
@@ -149,6 +142,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SignIn(childComplexity, args["signInInput"].(model.SignInInput)), true
+
+	case "Mutation.signOut":
+		if e.complexity.Mutation.SignOut == nil {
+			break
+		}
+
+		return e.complexity.Mutation.SignOut(childComplexity), true
 
 	case "Mutation.signUp":
 		if e.complexity.Mutation.SignUp == nil {
@@ -369,7 +369,7 @@ type Msg {
 extend type Mutation {
   signIn(signInInput: SignInInput!): User!
   signUp(signUpInput: SignUpInput!): User!
-  logout: Msg!
+  signOut: Msg!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -843,8 +843,8 @@ func (ec *executionContext) fieldContext_Mutation_signUp(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_logout(ctx, field)
+func (ec *executionContext) _Mutation_signOut(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signOut(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -857,7 +857,7 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Logout(rctx)
+		return ec.resolvers.Mutation().SignOut(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -874,7 +874,7 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 	return ec.marshalNMsg2ᚖappᚋgraphᚋmodelᚐMsg(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_logout(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_signOut(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -3464,10 +3464,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "logout":
+		case "signOut":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_logout(ctx, field)
+				return ec._Mutation_signOut(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

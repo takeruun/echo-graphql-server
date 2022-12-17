@@ -7,7 +7,6 @@ package resolver
 import (
 	"app/graph/model"
 	"context"
-	"fmt"
 )
 
 // SignIn is the resolver for the signIn field.
@@ -24,7 +23,14 @@ func (r *mutationResolver) SignUp(ctx context.Context, signUpInput model.SignUpI
 	return user, err
 }
 
-// Logout is the resolver for the logout field.
-func (r *mutationResolver) Logout(ctx context.Context) (*model.Msg, error) {
-	panic(fmt.Errorf("not implemented: Logout - logout"))
+// SignOut is the resolver for the signOut field.
+func (r *mutationResolver) SignOut(ctx context.Context) (*model.Msg, error) {
+	err := r.AuthUsecase.SignOut(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Msg{
+		Message: "ok",
+	}, nil
 }
