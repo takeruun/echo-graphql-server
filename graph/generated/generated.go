@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateTodo func(childComplexity int, input model.CreateTodo) int
+		DeleteTodo func(childComplexity int, id string) int
 		Empty      func(childComplexity int) int
 		SignIn     func(childComplexity int, signInInput model.SignInInput) int
 		SignOut    func(childComplexity int) int
@@ -80,6 +81,7 @@ type MutationResolver interface {
 	Empty(ctx context.Context) (*string, error)
 	CreateTodo(ctx context.Context, input model.CreateTodo) (*model.Todo, error)
 	UpdateTodo(ctx context.Context, input model.UpdateTodo) (*model.Todo, error)
+	DeleteTodo(ctx context.Context, id string) (*model.Msg, error)
 	SignIn(ctx context.Context, signInInput model.SignInInput) (*model.User, error)
 	SignUp(ctx context.Context, signUpInput model.SignUpInput) (*model.User, error)
 	SignOut(ctx context.Context) (*model.Msg, error)
@@ -123,6 +125,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(model.CreateTodo)), true
+
+	case "Mutation.deleteTodo":
+		if e.complexity.Mutation.DeleteTodo == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteTodo_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(string)), true
 
 	case "Mutation._empty":
 		if e.complexity.Mutation.Empty == nil {
@@ -320,6 +334,10 @@ var sources = []*ast.Source{
 
 type Mutation {
   _empty: String
+}
+
+type Msg {
+  message: String!
 }`, BuiltIn: false},
 	{Name: "../schemas/todo.graphql", Input: `type Todo {
   id: ID!
@@ -341,6 +359,7 @@ input UpdateTodo {
 extend type Mutation {
   createTodo(input: CreateTodo!): Todo!
   updateTodo(input: UpdateTodo!): Todo!
+  deleteTodo(id: ID!): Msg!
 }
 
 extend type Query {
@@ -361,10 +380,6 @@ input SignUpInput {
   email: String!
   name: String!
   password: String!
-}
-
-type Msg {
-  message: String!
 }
 
 extend type Mutation {
@@ -391,6 +406,21 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -716,6 +746,65 @@ func (ec *executionContext) fieldContext_Mutation_updateTodo(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateTodo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteTodo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteTodo(rctx, fc.Args["id"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Msg)
+	fc.Result = res
+	return ec.marshalNMsg2ᚖappᚋgraphᚋmodelᚐMsg(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteTodo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "message":
+				return ec.fieldContext_Msg_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Msg", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteTodo_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3450,6 +3539,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTodo(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteTodo":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteTodo(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

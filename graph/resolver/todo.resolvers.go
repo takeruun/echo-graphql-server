@@ -32,6 +32,19 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, input model.UpdateTod
 	return entity.ToModelTodo(todo), nil
 }
 
+// DeleteTodo is the resolver for the deleteTodo field.
+func (r *mutationResolver) DeleteTodo(ctx context.Context, id string) (*model.Msg, error) {
+	todoId, _ := strconv.Atoi(id)
+	err := r.TodoUsecase.Delete(ctx, todoId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Msg{
+		Message: "ok",
+	}, nil
+}
+
 // Todo is the resolver for the todo field.
 func (r *queryResolver) Todo(ctx context.Context, id string) (*model.Todo, error) {
 	todoId, _ := strconv.Atoi(id)

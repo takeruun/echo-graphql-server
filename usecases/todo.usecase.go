@@ -122,6 +122,24 @@ func (tu *todoUsecase) Edit(ctx context.Context, updateParams *model.UpdateTodo)
 }
 
 func (tu *todoUsecase) Delete(ctx context.Context, todoId int) error {
+	accessToken, err := tu.cookieService.GetCookieValue(ctx, ACCESS_TOKEN_KEY)
+	if err != nil {
+		return err
+	}
+
+	auth, err := tu.jwtService.ParseToken(accessToken)
+	if err != nil {
+		return err
+	}
+
+	todo, err := tu.todoRepo.Find(todoId)
+	if err != nil {
+		return err
+	}
+	if uint64(auth.Uid) != todo.UserId {
+		return errors.New("no your todo")
+	}
+
 	if err := tu.todoRepo.Delete(&entity.Todo{ID: uint64(todoId)}); err != nil {
 		return err
 	}

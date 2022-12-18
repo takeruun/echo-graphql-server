@@ -18,6 +18,7 @@ input UpdateTodo {
 extend type Mutation {
   createTodo(input: CreateTodo!): Todo!
   updateTodo(input: UpdateTodo!): Todo!
+  deleteTodo(id: ID!): Msg!
 }
 
 extend type Query {
