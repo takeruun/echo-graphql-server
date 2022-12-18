@@ -334,6 +334,7 @@ input CreateTodo {
 }
 
 input UpdateTodo {
+  id: ID!
   description: String!
 }
 
@@ -3346,13 +3347,21 @@ func (ec *executionContext) unmarshalInputUpdateTodo(ctx context.Context, obj in
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"description"}
+	fieldsInOrder := [...]string{"id", "description"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "description":
 			var err error
 

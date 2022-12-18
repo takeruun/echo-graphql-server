@@ -7,13 +7,14 @@ import (
 	"app/services"
 	"context"
 	"errors"
+	"strconv"
 )
 
 type TodoUsecase interface {
 	FindAll(ctx context.Context) (todos []*entity.Todo, err error)
-	Create(ctx context.Context, createParams *model.CreateTodo) (todos *entity.Todo, err error)
+	Create(ctx context.Context, createParams *model.CreateTodo) (todo *entity.Todo, err error)
 	Show(ctx context.Context, todoId int) (todo *entity.Todo, err error)
-	Edit(todoId int, updateParams *model.UpdateTodo) (todo *entity.Todo, err error)
+	Edit(ctx context.Context, updateParams *model.UpdateTodo) (todo *entity.Todo, err error)
 	Delete(ctx context.Context, todoId int) error
 }
 
@@ -90,7 +91,27 @@ func (tu *todoUsecase) Show(ctx context.Context, todoId int) (todo *entity.Todo,
 	return
 }
 
-func (tu *todoUsecase) Edit(todoId int, updateParams *model.UpdateTodo) (todo *entity.Todo, err error) {
+func (tu *todoUsecase) Edit(ctx context.Context, updateParams *model.UpdateTodo) (todo *entity.Todo, err error) {
+	accessToken, err := tu.cookieService.GetCookieValue(ctx, ACCESS_TOKEN_KEY)
+	if err != nil {
+		return nil, err
+	}
+
+	auth, err := tu.jwtService.ParseToken(accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	todoId, _ := strconv.Atoi(updateParams.ID)
+
+	todo, err = tu.todoRepo.Find(todoId)
+	if err != nil {
+		return nil, err
+	}
+	if uint64(auth.Uid) != todo.UserId {
+		return nil, errors.New("no your todo")
+	}
+
 	t := entity.Todo{ID: uint64(todoId), Description: updateParams.Description}
 	todo, err = tu.todoRepo.Update(&t)
 	if err != nil {
