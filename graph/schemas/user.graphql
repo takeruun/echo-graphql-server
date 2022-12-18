@@ -14,10 +14,6 @@ input SignUpInput {
   password: String!
 }
 
-type Msg {
-  message: String!
-}
-
 extend type Mutation {
   signIn(signInInput: SignInInput!): User!
   signUp(signUpInput: SignUpInput!): User!

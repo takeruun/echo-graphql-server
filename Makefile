@@ -5,8 +5,14 @@ setup:
 db.create:
 	docker-compose run --rm echo_graphql go run db/create_database.go
 
+db.test.create:
+	docker-compose run -e GO_MODE=test --rm echo_graphql go run db/create_database.go
+
 db.migrate:
 	docker-compose run --rm echo_graphql sql-migrate up
+
+db.test.migrate:
+	docker-compose run --rm echo_graphql sql-migrate up -env="test"
 
 db.seed:
 	docker-compose run --rm echo_graphql go run db/seed/seeder.go

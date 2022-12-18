@@ -9,7 +9,7 @@ import (
 )
 
 type JwtService interface {
-	GenerateToken(administratorID uint, now time.Time) (string, error)
+	GenerateToken(userId uint, now time.Time) (string, error)
 	ParseToken(signedString string) (*Auth, error)
 }
 
