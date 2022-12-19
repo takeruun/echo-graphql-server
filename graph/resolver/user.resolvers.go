@@ -13,15 +13,21 @@ import (
 // SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, signInInput model.SignInInput) (*model.User, error) {
 	user, err := r.AuthUsecase.SignIn(ctx, &signInInput)
+	if err != nil {
+		return nil, err
+	}
 
-	return entity.ToModelUser(user), err
+	return entity.ToModelUser(user), nil
 }
 
 // SignUp is the resolver for the signUp field.
 func (r *mutationResolver) SignUp(ctx context.Context, signUpInput model.SignUpInput) (*model.User, error) {
 	user, err := r.AuthUsecase.SignUp(ctx, &signUpInput)
+	if err != nil {
+		return nil, err
+	}
 
-	return entity.ToModelUser(user), err
+	return entity.ToModelUser(user), nil
 }
 
 // SignOut is the resolver for the signOut field.
